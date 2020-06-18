@@ -6,6 +6,8 @@ samples: "config/samples.tsv"
 cellranger:
     # Path of folder containing 10x-compatible reference (--transcriptome)
     transcriptome: "/ifs/mirror/10xgenomics/refdata-cellranger-GRCh38-3.0.0"
+    # Job manager to use.
+    jobmode: sge
     # misc
-    threads: 16
+    threads: 32
     memory_per_cpu: 8

@@ -9,7 +9,7 @@ rule cellranger_count:
     params:
         transcriptome=config['cellranger']['transcriptome'],
         expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
-        local_memory=config['cellranger']['memory_per_cpu'] * config['cellranger']['threads'],
+        runtime_options=get_runtime_options(),
         sample_option=get_sample_option,
         threads=config['cellranger']['threads']
     envmodules:
@@ -27,9 +27,7 @@ rule cellranger_count:
         --fastqs={input.fastqs} \
         {params.sample_option} \
         --expect-cells={params.expect_cells} \
-        --jobmode=local \
-        --localcores={params.threads} \
-        --localmem={params.local_memory} \
+        {params.runtime_options} \
         2> {log.stderr} &&
         mv {wildcards.sample} {output}
         """

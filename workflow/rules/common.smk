@@ -24,10 +24,27 @@ def get_sample_option(wildcards):
     option_str = ""
     
     sample_prefix = samples['prefix'][wildcards.sample]
-    print(sample_prefix)
 
     if sample_prefix != ".":
         option_str += f"--sample={sample_prefix}"
         
+    return option_str
+
+
+def get_runtime_options():
+    '''
+    
+    '''
+    option_str = ""
+    jobmode = config['cellranger']['jobmode']
+    threads = config['cellranger']['threads']
+    if jobmode == "local":
+        local_memory = config['cellranger']['memory_per_cpu'] * threads
+        option_str += f"--jobmode=local --localcores={threads} --localmem={local_memory}"
+    elif jobmode == "sge":
+        memory_per_cpu = config['cellranger']['memory_per_cpu']
+        option_str += f"--jobmode=sge --maxjobs={threads} --mempercore={memory_per_cpu}"
+    else:
+        raise NameError(f"Invalid job mode: {params.jobmode}")
     return option_str
 
