@@ -21,8 +21,10 @@ def get_runtime_options():
     Get cellranger runtime options.
     '''
     option_str = ""
+    
     jobmode = config['cellranger']['jobmode']
     threads = config['cellranger']['threads']
+    
     if jobmode == "local":
         local_memory = config['cellranger']['memory_per_cpu'] * threads
         option_str += f"--jobmode=local --localcores={threads} --localmem={local_memory}"
@@ -30,8 +32,27 @@ def get_runtime_options():
         memory_per_cpu = config['cellranger']['memory_per_cpu']
         option_str += f"--jobmode=sge --maxjobs={threads} --mempercore={memory_per_cpu}"
     else:
-        raise NameError(f"Invalid job mode: {params.jobmode}")
+        raise NameError(f"Invalid job mode: {jobmode}")
+    
     return option_str
+
+
+
+def get_rule_threads():
+    '''
+    Get the number of threads given to run the rule.
+    '''
+    threads = 1
+    
+    jobmode = config['cellranger']['jobmode']
+    if jobmode == "local":
+        threads = config['cellranger']['threads']
+    elif jobmode == "sge":
+        threads = 1
+    else:
+        raise NameError(f"Invalid job mode: {jobmode}")
+    
+    return threads
 
 
 rule cellranger_count:
@@ -49,7 +70,7 @@ rule cellranger_count:
         threads=config['cellranger']['threads']
     envmodules:
         "bio/cellranger/3.0.1"
-    threads: config['cellranger']['threads']
+    threads: get_rule_threads()
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
     log: "results/logs/cellranger_count/{sample}.err"
@@ -62,5 +83,6 @@ rule cellranger_count:
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log} &&
-        mv {wildcards.sample} results/cellranger_count/{wildcards.sample}
+        rm -rf results/cellranger_count/{wildcards.sample} &&
+        mv {wildcards.sample} results/cellranger_count/
         """
