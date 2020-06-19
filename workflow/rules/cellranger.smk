@@ -38,9 +38,9 @@ rule cellranger_count:
     input:
         fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
     output:
-        "results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
-        "results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
-        "results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
+        raw="results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
+        filtered="results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
+        bam="results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
     params:
         transcriptome=config['cellranger']['transcriptome'],
         expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
@@ -62,5 +62,5 @@ rule cellranger_count:
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log} &&
-        mv {wildcards.sample} {output}
+        mv {wildcards.sample} results/cellranger_count/{wildcards.sample}
         """
