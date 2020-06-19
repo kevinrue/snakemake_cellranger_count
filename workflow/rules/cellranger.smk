@@ -38,7 +38,9 @@ rule cellranger_count:
     input:
         fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
     output:
-        directory("results/cellranger_count/{sample}")
+        "results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
+        "results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
+        "results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
     params:
         transcriptome=config['cellranger']['transcriptome'],
         expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
