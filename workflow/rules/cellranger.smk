@@ -73,7 +73,9 @@ rule cellranger_count:
     threads: get_rule_threads()
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
-    log: "results/logs/cellranger_count/{sample}.err"
+    log:
+        err="results/logs/cellranger_count/{sample}.err",
+        out="results/logs/cellranger_count/{sample}.out"
     shell:
         """
         cellranger count --id={wildcards.sample} \
@@ -82,7 +84,7 @@ rule cellranger_count:
         {params.sample_option} \
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
-        2> {log} &&
+        2> {log.err} > {log.out} &&
         rm -rf results/cellranger_count/{wildcards.sample} &&
         mv {wildcards.sample} results/cellranger_count/
         """
