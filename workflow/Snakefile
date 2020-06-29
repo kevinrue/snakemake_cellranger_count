@@ -18,3 +18,13 @@ rule all:
 
 include: "rules/cellranger.smk"
 include: "rules/other.smk"
+
+# Conditionally add rules to the directive 'localrules'
+_localrules = list(workflow._localrules) # get the local rules so far
+
+# cellranger jobmode 'sge' should be run on the head node, as it submits job itself
+cellranger_local_jobmodes = ['sge']
+if config['cellranger']['jobmode'] in cellranger_local_jobmodes:
+    _localrules.append('cellranger_count')
+
+workflow._localrules = set(_localrules) # set the updated local rules
