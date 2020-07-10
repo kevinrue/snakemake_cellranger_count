@@ -63,47 +63,51 @@ rule genome:
         FTP.remote(config['cellranger']['genome'])
     output:
         'resources/genome.fa.gz'
-    run:
-        shell('mv {input} {output}')
-        shell('gunzip genome.fa.gz.backup -c | bgzip -c > genome.fa.gz')
+    shell:
+        '''
+        mv {input} {output}
+        '''
 
 
 rule genesets:
     input:
         FTP.remote(config['cellranger']['genesets'])
     output:
-        'resources/genesets.gtf.gz'
-    envmodules:
-        "bio/htslib/1.5"
+        'resources/genesets.gtf'
     shell:
         '''
-        gunzip {input} -c | bgzip -c > genome.fa.gz
+        mv {input} {output}
         '''
-
+        
 
 rule cellranger_mkref:
     input:
         fasta='resources/genome.fa.gz',
-        genes='resources/genesets.gtf.gz'
+        genes='resources/genesets.gtf'
     output:
-        directory("cellranger_index")
+        directory("resources/cellranger_index")
     params:
         threads=config['cellranger']['threads']
     envmodules:
-        "bio/cellranger/3.1.0",
-        "bio/htslib/1.5"
+        "bio/cellranger/3.1.0"
     threads: config['cellranger']['threads']
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
-    log: "results/logs/cellranger_mkref.log"
+    log:
+        err="results/logs/cellranger_mkref.err",
+        out="results/logs/cellranger_mkref.out",
     shell:
         """
+        gunzip -c {input.genes} > {input.genes}.tmp &&
+        gunzip -c {input.fasta} > {input.fasta}.tmp &&
         cellranger mkref \
-        --genome={output} \
-        --fasta="{input.fasta}" \
-        --genes="{input.genes}" \
+        --genome=cellranger_index \
+        --fasta="{input.fasta}.tmp" \
+        --genes="{input.genes}.tmp" \
         --nthreads={params.threads} \
-        2> {log}
+        2> {log.err} > {log.out} &&
+        mv cellranger_index {output} &&
+        rm {input.genes}.tmp {input.fasta}.tmp
         """
 
 
