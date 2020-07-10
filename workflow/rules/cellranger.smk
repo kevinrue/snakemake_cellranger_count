@@ -29,7 +29,7 @@ def get_runtime_options():
     threads = config['cellranger']['threads']
     
     if jobmode == "local":
-        local_memory = config['cellranger']['memory_per_cpu'] * threads
+        local_memory = get_local_memory(),
         option_str += f"--jobmode=local --localcores={threads} --localmem={local_memory}"
     elif jobmode == "sge":
         memory_per_cpu = config['cellranger']['memory_per_cpu']
@@ -38,6 +38,18 @@ def get_runtime_options():
         raise NameError(f"Invalid job mode: {jobmode}")
     
     return option_str
+
+
+def get_local_memory():
+    '''
+    Get cellranger mkref memory options.
+    '''
+    jobmode = config['cellranger']['jobmode']
+    threads = config['cellranger']['threads']
+    
+    memory_value = config['cellranger']['memory_per_cpu'] * threads
+    
+    return memory_value
 
 
 
@@ -87,6 +99,7 @@ rule cellranger_mkref:
     output:
         directory("resources/cellranger_index")
     params:
+        memory=get_local_memory(),
         threads=config['cellranger']['threads']
     envmodules:
         "bio/cellranger/3.1.0"
@@ -105,6 +118,7 @@ rule cellranger_mkref:
         --fasta="{input.fasta}.tmp" \
         --genes="{input.genes}.tmp" \
         --nthreads={params.threads} \
+        --memgb={params.memory}
         2> {log.err} > {log.out} &&
         mv cellranger_index {output} &&
         rm {input.genes}.tmp {input.fasta}.tmp
