@@ -4,6 +4,10 @@
 samples: "config/samples.tsv"
 
 cellranger:
+    # url to genome (fasta)
+    genome: "ftp://ftp.ensembl.org/pub/release-100/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
+    # URL to gene sets (gtf)
+    genesets: "ftp://ftp.ensembl.org/pub/release-100/gtf/homo_sapiens/Homo_sapiens.GRCh38.100.chr_patch_hapl_scaff.gtf.gz"
     # Path of folder containing 10x-compatible reference (--transcriptome)
     transcriptome: "/ifs/mirror/10xgenomics/refdata-cellranger-GRCh38-3.0.0"
     # Job manager to use.

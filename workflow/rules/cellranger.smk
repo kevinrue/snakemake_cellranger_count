@@ -1,3 +1,6 @@
+from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
+FTP = FTPRemoteProvider()
+
 import glob
 
 
@@ -55,6 +58,55 @@ def get_rule_threads():
     return threads
 
 
+rule genome:
+    input:
+        FTP.remote(config['cellranger']['genome'])
+    output:
+        'resources/genome.fa.gz'
+    run:
+        shell('mv {input} {output}')
+        shell('gunzip genome.fa.gz.backup -c | bgzip -c > genome.fa.gz')
+
+
+rule genesets:
+    input:
+        FTP.remote(config['cellranger']['genesets'])
+    output:
+        'resources/genesets.gtf.gz'
+    envmodules:
+        "bio/htslib/1.5"
+    shell:
+        '''
+        gunzip {input} -c | bgzip -c > genome.fa.gz
+        '''
+
+
+rule cellranger_mkref:
+    input:
+        fasta='resources/genome.fa.gz',
+        genes='resources/genesets.gtf.gz'
+    output:
+        directory("cellranger_index")
+    params:
+        threads=config['cellranger']['threads']
+    envmodules:
+        "bio/cellranger/3.1.0",
+        "bio/htslib/1.5"
+    threads: config['cellranger']['threads']
+    resources:
+        mem_free_gb=config['cellranger']['memory_per_cpu']
+    log: "results/logs/cellranger_mkref.log"
+    shell:
+        """
+        cellranger mkref \
+        --genome={output} \
+        --fasta="{input.fasta}" \
+        --genes="{input.genes}" \
+        --nthreads={params.threads} \
+        2> {log}
+        """
+
+
 rule cellranger_count:
     input:
         fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
@@ -69,7 +121,7 @@ rule cellranger_count:
         sample_option=get_sample_option,
         threads=config['cellranger']['threads']
     envmodules:
-        "bio/cellranger/3.0.1"
+        "bio/cellranger/3.1.0"
     threads: get_rule_threads()
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
