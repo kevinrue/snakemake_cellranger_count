@@ -3,8 +3,8 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 [![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_10x.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_10x)
 
-This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
-Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+This pipeline executes `cellranger count` on FASTQ files produced using 10X Genomics kits.
+The pipeline requires either a reference package obtained from the [10X Genomics website](https://support.10xgenomics.com/single-cell-vdj/software/downloads/3.1/) or a [custom reference](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references) computed using an upstream pipeline (e.g. [kevinrue/snakemake_cellranger_mkref](https://github.com/kevinrue/snakemake_cellranger_mkref)).
 
 ## Authors
 
