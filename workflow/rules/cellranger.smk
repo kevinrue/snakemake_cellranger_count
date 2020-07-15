@@ -91,6 +91,7 @@ rule cellranger_count:
     shell:
         """
         {DATETIME} > {log.time} &&
+        rm -rf results/cellranger_count/{wildcards.sample} &&
         cellranger count --id={wildcards.sample} \
         --transcriptome={params.transcriptome} \
         --fastqs={input.fastqs} \
@@ -98,7 +99,6 @@ rule cellranger_count:
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log.err} > {log.out} &&
-        rm -rf results/cellranger_count/{wildcards.sample} &&
-        mv {wildcards.sample} results/cellranger_count/ &&
+        mv {wildcards.sample} results/cellranger_count/{wildcards.sample} &&
         {DATETIME} >> {log.time}
         """
