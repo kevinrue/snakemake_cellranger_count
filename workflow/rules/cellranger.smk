@@ -89,7 +89,8 @@ rule cellranger_count:
         mem_free_gb=config['cellranger']['memory_per_cpu']
     log:
         err="results/logs/cellranger_count/{sample}.err",
-        out="results/logs/cellranger_count/{sample}.out"
+        out="results/logs/cellranger_count/{sample}.out",
+        time="results/logs/time/cellranger_count/{sample}"
     shell:
         """
         {DATETIME} > {log.time} &&
