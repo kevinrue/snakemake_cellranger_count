@@ -5,7 +5,7 @@ samples: "config/samples.tsv"
 
 cellranger:
     # Path of folder containing 10x-compatible reference (--transcriptome)
-    transcriptome: "/ifs/mirror/10xgenomics/refdata-cellranger-GRCh38-3.0.0"
+    transcriptome: "../snakemake_cellranger_mkref/results/cellranger_index"
     # Job manager to use.
     jobmode: sge
     # misc
