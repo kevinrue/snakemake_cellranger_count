@@ -9,5 +9,5 @@ cellranger:
     # Job manager to use.
     jobmode: sge
     # misc
-    threads: 24
-    memory_per_cpu: 8
+    threads: 64
+    memory_per_cpu: 4
