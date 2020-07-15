@@ -19,6 +19,18 @@ def get_sample_option(wildcards):
     return option_str
 
 
+def get_local_memory():
+    '''
+    Get cellranger mkref memory options.
+    '''
+    jobmode = config['cellranger']['jobmode']
+    threads = config['cellranger']['threads']
+    
+    memory_value = config['cellranger']['memory_per_cpu'] * threads
+    
+    return memory_value
+
+
 def get_runtime_options():
     '''
     Get cellranger runtime options.
@@ -40,19 +52,6 @@ def get_runtime_options():
     return option_str
 
 
-def get_local_memory():
-    '''
-    Get cellranger mkref memory options.
-    '''
-    jobmode = config['cellranger']['jobmode']
-    threads = config['cellranger']['threads']
-    
-    memory_value = config['cellranger']['memory_per_cpu'] * threads
-    
-    return memory_value
-
-
-
 def get_rule_threads():
     '''
     Get the number of threads given to run the rule.
@@ -68,61 +67,6 @@ def get_rule_threads():
         raise NameError(f"Invalid job mode: {jobmode}")
     
     return threads
-
-
-rule genome:
-    input:
-        FTP.remote(config['cellranger']['genome'])
-    output:
-        'resources/genome.fa.gz'
-    shell:
-        '''
-        mv {input} {output}
-        '''
-
-
-rule genesets:
-    input:
-        FTP.remote(config['cellranger']['genesets'])
-    output:
-        'resources/genesets.gtf'
-    shell:
-        '''
-        mv {input} {output}
-        '''
-        
-
-rule cellranger_mkref:
-    input:
-        fasta='resources/genome.fa.gz',
-        genes='resources/genesets.gtf'
-    output:
-        directory("resources/cellranger_index")
-    params:
-        memory=get_local_memory(),
-        threads=config['cellranger']['threads']
-    envmodules:
-        "bio/cellranger/3.1.0"
-    threads: config['cellranger']['threads']
-    resources:
-        mem_free_gb=config['cellranger']['memory_per_cpu']
-    log:
-        err="results/logs/cellranger_mkref.err",
-        out="results/logs/cellranger_mkref.out",
-    shell:
-        """
-        gunzip -c {input.genes} > {input.genes}.tmp &&
-        gunzip -c {input.fasta} > {input.fasta}.tmp &&
-        cellranger mkref \
-        --genome=cellranger_index \
-        --fasta="{input.fasta}.tmp" \
-        --genes="{input.genes}.tmp" \
-        --nthreads={params.threads} \
-        --memgb={params.memory}
-        2> {log.err} > {log.out} &&
-        mv cellranger_index {output} &&
-        rm {input.genes}.tmp {input.fasta}.tmp
-        """
 
 
 rule cellranger_count:
@@ -148,6 +92,7 @@ rule cellranger_count:
         out="results/logs/cellranger_count/{sample}.out"
     shell:
         """
+        {DATETIME} > {log.time} &&
         cellranger count --id={wildcards.sample} \
         --transcriptome={params.transcriptome} \
         --fastqs={input.fastqs} \
@@ -156,5 +101,6 @@ rule cellranger_count:
         {params.runtime_options} \
         2> {log.err} > {log.out} &&
         rm -rf results/cellranger_count/{wildcards.sample} &&
-        mv {wildcards.sample} results/cellranger_count/
+        mv {wildcards.sample} results/cellranger_count/ &&
+        {DATETIME} >> {log.time}
         """
