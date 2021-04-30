@@ -1,10 +1,10 @@
-# Snakemake workflow: Cell Ranger for 10X
+# Snakemake workflow: Quantitation of 10X Genomics data using Cell Ranger
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_10x.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_10x)
+[![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_count.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_count)
 
-This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
-Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+This pipeline executes `cellranger count` on FASTQ files produced using 10X Genomics kits.
+The pipeline requires either a reference package obtained from the [10X Genomics website](https://support.10xgenomics.com/single-cell-vdj/software/downloads/3.1/) or a [custom reference](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references) computed using an upstream pipeline (e.g. [kevinrue/snakemake_cellranger_mkref](https://github.com/kevinrue/snakemake_cellranger_mkref)).
 
 ## Authors
 
@@ -80,7 +80,7 @@ Whenever you change something, don't forget to commit the changes back to your g
 
 Whenever you want to synchronize your workflow copy with new developments from upstream, do the following.
 
-1. Once, register the upstream repository in your local copy: `git remote add -f upstream git@github.com:snakemake-workflows/snakemake_cellranger_10x.git` or `git remote add -f upstream https://github.com/snakemake-workflows/snakemake_cellranger_10x.git` if you do not have setup ssh keys.
+1. Once, register the upstream repository in your local copy: `git remote add -f upstream git@github.com:snakemake-workflows/snakemake_cellranger_count.git` or `git remote add -f upstream https://github.com/snakemake-workflows/snakemake_cellranger_count.git` if you do not have setup ssh keys.
 2. Update the upstream version: `git fetch upstream`.
 3. Create a diff with the current version: `git diff HEAD upstream/master workflow > upstream-changes.diff`.
 4. Investigate the changes: `vim upstream-changes.diff`.

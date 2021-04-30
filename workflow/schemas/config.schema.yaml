@@ -14,12 +14,15 @@ properties:
     properties:
       transcriptome:
         type: string
+      jobmode:
+        type: string
       threads:
         type: integer
       memory_per_cpu:
         type: integer
     required:
       - transcriptome
+      - jobmode
       - threads
       - memory_per_cpu
 

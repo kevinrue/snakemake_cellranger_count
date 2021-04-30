@@ -16,6 +16,18 @@ def get_sample_option(wildcards):
     return option_str
 
 
+def get_local_memory():
+    '''
+    Get cellranger mkref memory options.
+    '''
+    jobmode = config['cellranger']['jobmode']
+    threads = config['cellranger']['threads']
+    
+    memory_value = config['cellranger']['memory_per_cpu'] * threads
+    
+    return memory_value
+
+
 def get_runtime_options():
     '''
     Get cellranger runtime options.
@@ -26,7 +38,7 @@ def get_runtime_options():
     threads = config['cellranger']['threads']
     
     if jobmode == "local":
-        local_memory = config['cellranger']['memory_per_cpu'] * threads
+        local_memory = get_local_memory(),
         option_str += f"--jobmode=local --localcores={threads} --localmem={local_memory}"
     elif jobmode == "sge":
         memory_per_cpu = config['cellranger']['memory_per_cpu']
@@ -35,7 +47,6 @@ def get_runtime_options():
         raise NameError(f"Invalid job mode: {jobmode}")
     
     return option_str
-
 
 
 def get_rule_threads():
@@ -69,15 +80,18 @@ rule cellranger_count:
         sample_option=get_sample_option,
         threads=config['cellranger']['threads']
     envmodules:
-        "bio/cellranger/3.0.1"
+        "bio/cellranger/3.1.0"
     threads: get_rule_threads()
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
     log:
         err="results/logs/cellranger_count/{sample}.err",
-        out="results/logs/cellranger_count/{sample}.out"
+        out="results/logs/cellranger_count/{sample}.out",
+        time="results/logs/time/cellranger_count/{sample}"
     shell:
         """
+        {DATETIME} > {log.time} &&
+        rm -rf results/cellranger_count/{wildcards.sample} &&
         cellranger count --id={wildcards.sample} \
         --transcriptome={params.transcriptome} \
         --fastqs={input.fastqs} \
@@ -85,6 +99,6 @@ rule cellranger_count:
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log.err} > {log.out} &&
-        rm -rf results/cellranger_count/{wildcards.sample} &&
-        mv {wildcards.sample} results/cellranger_count/
+        mv {wildcards.sample} results/cellranger_count/{wildcards.sample} &&
+        {DATETIME} >> {log.time}
         """
